@@ -1,0 +1,134 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import UsersList from './UsersList';
+import ChatInterface from './ChatInterface';
+import ProfilePanel from './ProfilePanel';
+
+export default function ChatDashboard({ user, onLogout }) {
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showProfile, setShowProfile] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [currentUser, setCurrentUser] = useState(user);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const handleUserSelect = (selectedUser) => {
+    setSelectedUser(selectedUser);
+    if (isMobile) {
+      setShowProfile(false);
+    }
+  };
+
+  const handleShowProfile = () => {
+    setShowProfile(true);
+  };
+
+  const handleBackToChat = () => {
+    setShowProfile(false);
+  };
+
+  const handleUserUpdate = (updatedData) => {
+    // Update current user data
+    const updatedUser = {
+      ...currentUser,
+      fullName: updatedData.name,
+      avatar: updatedData.avatar,
+      statusMessage: updatedData.status,
+      about: updatedData.about
+    };
+    setCurrentUser(updatedUser);
+    
+    // If viewing own profile, update selected user too
+    if (selectedUser && selectedUser.name === currentUser.fullName) {
+      setSelectedUser({
+        ...selectedUser,
+        name: updatedData.name,
+        avatar: updatedData.avatar,
+        statusMessage: updatedData.status,
+        about: updatedData.about
+      });
+    }
+  };
+
+  return (
+    <div className="h-screen flex bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {/* Users List - Always visible on desktop, conditional on mobile */}
+      <div className={`${
+        isMobile && (selectedUser || showProfile) ? 'hidden' : 'block'
+      } w-full lg:w-80 border-r border-white/50 bg-white/80 backdrop-blur-xl shadow-xl`}>
+        <UsersList 
+          currentUser={currentUser}
+          onUserSelect={handleUserSelect}
+          onLogout={onLogout}
+          selectedUser={selectedUser}
+        />
+      </div>
+
+      {/* Chat Interface - Shows when user is selected */}
+      {selectedUser && !showProfile && (
+        <div className={`${isMobile ? 'w-full' : 'flex-1'} flex flex-col`}>
+          <ChatInterface 
+            currentUser={currentUser}
+            selectedUser={selectedUser}
+            onShowProfile={handleShowProfile}
+            onBack={() => setSelectedUser(null)}
+            isMobile={isMobile}
+          />
+        </div>
+      )}
+
+      {/* Profile Panel - Desktop: always visible when user selected, Mobile: overlay */}
+      {selectedUser && !isMobile && (
+        <div className="w-80 border-l border-white/50 bg-white/80 backdrop-blur-xl shadow-xl">
+          <ProfilePanel 
+            user={selectedUser}
+            currentUser={currentUser}
+            onClose={() => setShowProfile(false)}
+            onUserUpdate={handleUserUpdate}
+          />
+        </div>
+      )}
+
+      {/* Mobile Profile Overlay */}
+      {showProfile && isMobile && (
+        <div className="w-full bg-white/95 backdrop-blur-xl">
+          <ProfilePanel 
+            user={selectedUser}
+            currentUser={currentUser}
+            onClose={handleBackToChat}
+            onUserUpdate={handleUserUpdate}
+            isMobile={true}
+          />
+        </div>
+      )}
+
+      {/* Empty State - Desktop only */}
+      {!selectedUser && !isMobile && (
+        <div 
+          className="flex-1 flex items-center justify-center relative"
+          style={{
+            backgroundImage: `url('https://readdy.ai/api/search-image?query=Abstract%20geometric%20pattern%20with%20soft%20gradients%2C%20modern%20minimalist%20background%20design%2C%20blue%20and%20purple%20tones%2C%20subtle%20geometric%20shapes%2C%20clean%20contemporary%20wallpaper%2C%20peaceful%20atmosphere&width=800&height=600&seq=empty-bg&orientation=landscape')`
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-100/40 via-purple-100/30 to-pink-100/40"></div>
+          <div className="text-center relative z-10 bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl">
+            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i className="ri-chat-3-line text-2xl text-white"></i>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Welcome to ChatConnect</h3>
+            <p className="text-gray-500">Select a conversation to start chatting</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
