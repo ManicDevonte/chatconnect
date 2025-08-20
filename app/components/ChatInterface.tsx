@@ -4,31 +4,57 @@
 import { useState, useEffect, useRef } from 'react';
 import MessageBubble from './MessageBubble';
 
-export default function ChatInterface({ currentUser, selectedUser, onShowProfile, onBack, isMobile }) {
+type User = {
+  id: number;
+  name: string;
+  avatar: string;
+  status?: string;
+  isGroup?: boolean;
+  members?: number;
+};
+
+type ChatInterfaceProps = {
+  currentUser: User;
+  selectedUser: User;
+  onShowProfile: () => void;
+  onBack: () => void;
+  isMobile: boolean;
+};
+
+type Message = {
+  id: number;
+  senderId: number;
+  text: string;
+  timestamp: Date;
+  type: string;
+  fileUrl?: string | null;
+};
+
+export default function ChatInterface({ currentUser, selectedUser, onShowProfile, onBack, isMobile }: ChatInterfaceProps) {
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const mockMessages = {
-      1: [
+    const mockMessages: { [key: string]: Message[] } = {
+      '1': [
         { id: 1, senderId: 1, text: 'Hey! How are you doing?', timestamp: new Date(Date.now() - 120000), type: 'text' },
         { id: 2, senderId: currentUser.id, text: 'I\'m doing great! Thanks for asking. How about you?', timestamp: new Date(Date.now() - 60000), type: 'text' },
         { id: 3, senderId: 1, text: 'I\'m good too! Just finished a great project.', timestamp: new Date(Date.now() - 30000), type: 'text' }
       ],
-      2: [
+      '2': [
         { id: 4, senderId: 2, text: 'Can we schedule a meeting?', timestamp: new Date(Date.now() - 300000), type: 'text' },
         { id: 5, senderId: currentUser.id, text: 'Sure! What time works for you?', timestamp: new Date(Date.now() - 180000), type: 'text' },
         { id: 6, senderId: 2, text: 'How about 3 PM tomorrow?', timestamp: new Date(Date.now() - 60000), type: 'text' }
       ],
-      3: [
+      '3': [
         { id: 7, senderId: 3, text: 'Thanks for your help!', timestamp: new Date(Date.now() - 3600000), type: 'text' },
         { id: 8, senderId: currentUser.id, text: 'You\'re welcome! Anytime.', timestamp: new Date(Date.now() - 3500000), type: 'text' }
       ]
     };
 
-    setMessages(mockMessages[selectedUser.id] || []);
+    setMessages(mockMessages[selectedUser.id.toString()] || []);
   }, [selectedUser.id, currentUser.id]);
 
   useEffect(() => {
@@ -39,7 +65,7 @@ export default function ChatInterface({ currentUser, selectedUser, onShowProfile
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!message.trim()) return;
 
@@ -68,7 +94,7 @@ export default function ChatInterface({ currentUser, selectedUser, onShowProfile
     }, 2000);
   };
 
-  const handleFileUpload = (type) => {
+  const handleFileUpload = (type: string) => {
     const newMessage = {
       id: Date.now(),
       senderId: currentUser.id,
@@ -204,7 +230,7 @@ export default function ChatInterface({ currentUser, selectedUser, onShowProfile
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Type a message..."
                   className="w-full px-4 py-2 border border-white/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none text-sm bg-white/80 backdrop-blur-sm transition-all"
-                  rows="1"
+                  rows={1}
                   style={{ minHeight: '40px', maxHeight: '120px' }}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
@@ -216,7 +242,7 @@ export default function ChatInterface({ currentUser, selectedUser, onShowProfile
               </div>
               <button
                 type="submit"
-                className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full hover:from-blue-700 hover:to-purple-700 transition-all flex items-center justify-center cursor-pointer whitespace-nowrap shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="w-10 h-10 bg-green-600 text-white rounded-full hover:from-green-700 hover:to-blue-700 transition-all flex items-center justify-center cursor-pointer whitespace-nowrap shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 <i className="ri-send-plane-fill text-lg"></i>
               </button>

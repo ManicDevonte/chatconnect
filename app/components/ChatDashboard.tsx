@@ -5,11 +5,25 @@ import UsersList from './UsersList';
 import ChatInterface from './ChatInterface';
 import ProfilePanel from './ProfilePanel';
 
-export default function ChatDashboard({ user, onLogout }) {
-  const [selectedUser, setSelectedUser] = useState(null);
+// Define a User type (customize as needed)
+export type User = {
+  id: string;
+  name: string;
+  avatar?: string;
+  statusMessage?: string;
+  about?: string;
+};
+
+type ChatDashboardProps = {
+  user: User;
+  onLogout: () => void;
+};
+
+export default function ChatDashboard({ user, onLogout }: ChatDashboardProps) {
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showProfile, setShowProfile] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [currentUser, setCurrentUser] = useState(user);
+  const [currentUser, setCurrentUser] = useState<User>(user);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -21,7 +35,7 @@ export default function ChatDashboard({ user, onLogout }) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const handleUserSelect = (selectedUser) => {
+  const handleUserSelect = (selectedUser: User) => {
     setSelectedUser(selectedUser);
     if (isMobile) {
       setShowProfile(false);
@@ -36,19 +50,17 @@ export default function ChatDashboard({ user, onLogout }) {
     setShowProfile(false);
   };
 
-  const handleUserUpdate = (updatedData) => {
-    // Update current user data
-    const updatedUser = {
+  const handleUserUpdate = (updatedData: { name: string; avatar?: string; status?: string; about?: string }) => {
+    const updatedUser: User = {
       ...currentUser,
-      fullName: updatedData.name,
+      name: updatedData.name,
       avatar: updatedData.avatar,
       statusMessage: updatedData.status,
       about: updatedData.about
     };
     setCurrentUser(updatedUser);
     
-    // If viewing own profile, update selected user too
-    if (selectedUser && selectedUser.name === currentUser.fullName) {
+    if (selectedUser && selectedUser.name === currentUser.name) {
       setSelectedUser({
         ...selectedUser,
         name: updatedData.name,
@@ -94,6 +106,7 @@ export default function ChatDashboard({ user, onLogout }) {
             currentUser={currentUser}
             onClose={() => setShowProfile(false)}
             onUserUpdate={handleUserUpdate}
+            isMobile={false}
           />
         </div>
       )}

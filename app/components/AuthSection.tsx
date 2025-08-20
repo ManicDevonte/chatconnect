@@ -5,8 +5,13 @@ import { useState } from 'react';
 import SignupForm from './SignupForm';
 import SigninForm from './SigninForm';
 
-export default function AuthSection({ onLogin }) {
+type AuthSectionProps = {
+  onLogin: (...args: any[]) => void;
+};
+
+export default function AuthSection({ onLogin }: AuthSectionProps) {
   const [isSignup, setIsSignup] = useState(true);
+
 
   return (
     <div className="min-h-screen flex">
