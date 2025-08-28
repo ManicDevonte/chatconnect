@@ -26,8 +26,8 @@ type Message = {
   senderId: number;
   text: string;
   timestamp: Date;
-  type: string;
-  fileUrl?: string | null;
+  type: "text" | "image" | "video" | "voice";
+  fileUrl?: string;
 };
 
 export default function ChatInterface({ currentUser, selectedUser, onShowProfile, onBack, isMobile }: ChatInterfaceProps) {
@@ -65,11 +65,10 @@ export default function ChatInterface({ currentUser, selectedUser, onShowProfile
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const sendMessage = () => {
     if (!message.trim()) return;
 
-    const newMessage = {
+    const newMessage: Message = {
       id: Date.now(),
       senderId: currentUser.id,
       text: message.trim(),
@@ -83,7 +82,7 @@ export default function ChatInterface({ currentUser, selectedUser, onShowProfile
     setIsTyping(true);
     setTimeout(() => {
       setIsTyping(false);
-      const replyMessage = {
+      const replyMessage: Message = {
         id: Date.now() + 1,
         senderId: selectedUser.id,
         text: 'Thanks for your message!',
@@ -94,8 +93,13 @@ export default function ChatInterface({ currentUser, selectedUser, onShowProfile
     }, 2000);
   };
 
-  const handleFileUpload = (type: string) => {
-    const newMessage = {
+  const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    sendMessage();
+  };
+
+  const handleFileUpload = (type: "image" | "video" | "voice") => {
+    const newMessage: Message = {
       id: Date.now(),
       senderId: currentUser.id,
       text: `Shared a ${type}`,
@@ -103,7 +107,7 @@ export default function ChatInterface({ currentUser, selectedUser, onShowProfile
       type: type,
       fileUrl: type === 'image' 
         ? `https://readdy.ai/api/search-image?query=Beautiful%20landscape%20photo%20with%20mountains%20and%20lake%2C%20nature%20photography%2C%20scenic%20view%2C%20high%20quality&width=300&height=200&seq=shared-${Date.now()}&orientation=landscape`
-        : null
+        : undefined
     };
 
     setMessages(prev => [...prev, newMessage]);
@@ -228,21 +232,20 @@ export default function ChatInterface({ currentUser, selectedUser, onShowProfile
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Type a message..."
-                  className="w-full px-4 py-2 border border-white/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none text-sm bg-white/80 backdrop-blur-sm transition-all"
-                  rows={1}
-                  style={{ minHeight: '40px', maxHeight: '120px' }}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
-                      handleSendMessage(e);
+                      sendMessage();
                     }
                   }}
+                  className="w-full resize-none border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-white/80 shadow"
+                  rows={1}
+                  placeholder="Type your message..."
                 />
               </div>
               <button
                 type="submit"
-                className="w-10 h-10 bg-green-600 text-white rounded-full hover:from-green-700 hover:to-blue-700 transition-all flex items-center justify-center cursor-pointer whitespace-nowrap shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="w-10 h-10 bg-green-600 text-white rounded-full hover:green-700 transition-all flex items-center justify-center cursor-pointer whitespace-nowrap shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 <i className="ri-send-plane-fill text-lg"></i>
               </button>

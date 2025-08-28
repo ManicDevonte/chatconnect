@@ -1,16 +1,20 @@
-
 'use client';
 
 import { useState } from 'react';
 
-export default function SigninForm({ onLogin, onSwitchToSignup }) {
+type SigninFormProps = {
+  onLogin: (...args: any[]) => void;
+  onSwitchToSignup: () => void;
+};
+
+export default function SigninForm({ onLogin, onSwitchToSignup }: SigninFormProps) {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 

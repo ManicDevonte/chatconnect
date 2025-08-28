@@ -5,14 +5,7 @@ import UsersList from './UsersList';
 import ChatInterface from './ChatInterface';
 import ProfilePanel from './ProfilePanel';
 
-// Define a User type (customize as needed)
-export type User = {
-  id: string;
-  name: string;
-  avatar?: string;
-  statusMessage?: string;
-  about?: string;
-};
+import type { User } from '../types/User';
 
 type ChatDashboardProps = {
   user: User;
@@ -22,49 +15,52 @@ type ChatDashboardProps = {
 export default function ChatDashboard({ user, onLogout }: ChatDashboardProps) {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showProfile, setShowProfile] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User>(user);
-
+  const [currentUser, setCurrentUser] = useState<User>({
+    ...user,
+    status: user.status || '', // Ensure status is always a string
+  });
+  const [isMobile, setIsMobile] = useState<boolean>(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 1024);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const handleUserSelect = (selectedUser: User) => {
-    setSelectedUser(selectedUser);
-    if (isMobile) {
-      setShowProfile(false);
-    }
-  };
-
   const handleShowProfile = () => {
     setShowProfile(true);
   };
 
-  const handleBackToChat = () => {
-    setShowProfile(false);
+  const handleUserSelect = (user: User) => {
+    setSelectedUser({
+      ...user,
+      status: user.status || '', // Ensure status is always a string
+    });
+    if (isMobile) {
+      setShowProfile(false);
+    }
   };
 
   const handleUserUpdate = (updatedData: { name: string; avatar?: string; status?: string; about?: string }) => {
     const updatedUser: User = {
       ...currentUser,
       name: updatedData.name,
-      avatar: updatedData.avatar,
+      avatar: updatedData.avatar ?? currentUser.avatar,
+      status: updatedData.status ?? currentUser.status,
       statusMessage: updatedData.status,
       about: updatedData.about
     };
     setCurrentUser(updatedUser);
-    
+
     if (selectedUser && selectedUser.name === currentUser.name) {
       setSelectedUser({
         ...selectedUser,
         name: updatedData.name,
-        avatar: updatedData.avatar,
+        avatar: updatedData.avatar ?? selectedUser.avatar,
+        status: updatedData.status ?? selectedUser.status,
         statusMessage: updatedData.status,
         about: updatedData.about
       });
@@ -72,18 +68,13 @@ export default function ChatDashboard({ user, onLogout }: ChatDashboardProps) {
   };
 
   return (
-    <div className="h-screen flex bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      {/* Users List - Always visible on desktop, conditional on mobile */}
-      <div className={`${
-        isMobile && (selectedUser || showProfile) ? 'hidden' : 'block'
-      } w-full lg:w-80 border-r border-white/50 bg-white/80 backdrop-blur-xl shadow-xl`}>
-        <UsersList 
-          currentUser={currentUser}
-          onUserSelect={handleUserSelect}
-          onLogout={onLogout}
-          selectedUser={selectedUser}
-        />
-      </div>
+    <div className="flex h-full w-full">
+      <UsersList
+        currentUser={currentUser}
+        onUserSelect={handleUserSelect}
+        onLogout={onLogout}
+        selectedUser={selectedUser}
+      />
 
       {/* Chat Interface - Shows when user is selected */}
       {selectedUser && !showProfile && (
@@ -101,23 +92,25 @@ export default function ChatDashboard({ user, onLogout }: ChatDashboardProps) {
       {/* Profile Panel - Desktop: always visible when user selected, Mobile: overlay */}
       {selectedUser && !isMobile && (
         <div className="w-80 border-l border-white/50 bg-white/80 backdrop-blur-xl shadow-xl">
-          <ProfilePanel 
-            user={selectedUser}
-            currentUser={currentUser}
-            onClose={() => setShowProfile(false)}
-            onUserUpdate={handleUserUpdate}
-            isMobile={false}
-          />
+          {selectedUser && (
+            <ProfilePanel 
+              user={selectedUser}
+              currentUser={{ fullName: currentUser.name }}
+              onClose={() => setShowProfile(false)}
+              onUserUpdate={handleUserUpdate}
+              isMobile={false}
+            />
+          )}
         </div>
       )}
 
       {/* Mobile Profile Overlay */}
-      {showProfile && isMobile && (
+      {showProfile && isMobile && selectedUser && (
         <div className="w-full bg-white/95 backdrop-blur-xl">
           <ProfilePanel 
             user={selectedUser}
-            currentUser={currentUser}
-            onClose={handleBackToChat}
+            currentUser={{ fullName: currentUser.name }}
+            onClose={() => setShowProfile(false)}
             onUserUpdate={handleUserUpdate}
             isMobile={true}
           />

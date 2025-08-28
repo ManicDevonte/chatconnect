@@ -3,11 +3,32 @@
 
 import { useState, useEffect } from 'react';
 
-export default function UsersList({ currentUser, onUserSelect, onLogout, selectedUser }) {
+type User = {
+  id: number;
+  name: string;
+  avatar: string;
+  status?: string;
+  lastMessage?: string;
+  lastMessageTime?: string;
+  unreadCount?: number;
+  isTyping?: boolean;
+  // Add other fields as needed
+};
+
+type UsersListProps = {
+  currentUser: User;
+  onUserSelect: (user: User) => void;
+  onLogout: () => void;
+  selectedUser: User | null;
+};
+
+
+export default function UsersList({ currentUser, onUserSelect, onLogout, selectedUser }: UsersListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateGroup, setShowCreateGroup] = useState(false);
-  const [users, setUsers] = useState([]);
-  const [groups, setGroups] = useState([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [groups, setGroups] = useState<any[]>([]);
+
 
   useEffect(() => {
     // Mock users data
@@ -248,7 +269,7 @@ export default function UsersList({ currentUser, onUserSelect, onLogout, selecte
                         user.lastMessage
                       )}
                     </p>
-                    {user.unreadCount > 0 && (
+                    {(user.unreadCount ?? 0) > 0 && (
                       <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center shadow-lg">
                         {user.unreadCount}
                       </span>

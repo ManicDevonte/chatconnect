@@ -1,8 +1,26 @@
 
 'use client';
 
-export default function MessageBubble({ message, isOwn, user }) {
-  const formatTime = (timestamp) => {
+type Message = {
+  type: 'text' | 'image' | 'video' | 'voice';
+  text?: string;
+  fileUrl?: string;
+  timestamp: string | number | Date;
+};
+
+type User = {
+  name: string;
+  avatar: string;
+};
+
+interface MessageBubbleProps {
+  message: Message;
+  isOwn: boolean;
+  user: User;
+}
+
+export default function MessageBubble({ message, isOwn, user }: MessageBubbleProps) {
+  const formatTime = (timestamp: string | number | Date) => {
     return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 

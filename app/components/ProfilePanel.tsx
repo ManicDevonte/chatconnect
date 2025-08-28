@@ -4,7 +4,29 @@
 import { useState } from 'react';
 import ProfileEditModal from './ProfileEditModal';
 
-export default function ProfilePanel({ user, currentUser, onClose, isMobile, onUserUpdate }) {
+type User = {
+  name: string;
+  avatar: string;
+  status: string;
+  isGroup?: boolean;
+  members?: number;
+  about?: string;
+  statusMessage?: string;
+};
+
+type CurrentUser = {
+  fullName: string;
+};
+
+type ProfilePanelProps = {
+  user: User;
+  currentUser: CurrentUser;
+  onClose: () => void;
+  isMobile?: boolean;
+  onUserUpdate?: (updatedData: User) => void;
+};
+
+export default function ProfilePanel({ user, currentUser, onClose, isMobile, onUserUpdate }: ProfilePanelProps) {
   const [showMediaGallery, setShowMediaGallery] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
@@ -35,7 +57,7 @@ export default function ProfilePanel({ user, currentUser, onClose, isMobile, onU
     }
   ];
 
-  const handleProfileSave = (updatedData) => {
+  const handleProfileSave = (updatedData: User) => {
     if (onUserUpdate) {
       onUserUpdate(updatedData);
     }

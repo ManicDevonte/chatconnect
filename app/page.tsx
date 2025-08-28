@@ -4,12 +4,13 @@
 import { useState } from 'react';
 import AuthSection from './components/AuthSection';
 import ChatDashboard from './components/ChatDashboard';
+import type { User } from './components/ChatDashboard';
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
 
-  const handleLogin = (userData) => {
+  const handleLogin = (userData: User) => {
     setUser(userData);
     setIsAuthenticated(true);
   };
@@ -18,10 +19,13 @@ export default function Home() {
     setUser(null);
     setIsAuthenticated(false);
   };
-
   if (!isAuthenticated) {
     return <AuthSection onLogin={handleLogin} />;
   }
 
-  return <ChatDashboard user={user} onLogout={handleLogout} />;
+  if (user) {
+    return <ChatDashboard user={user} onLogout={handleLogout} />;
+  }
+
+  return null;
 }

@@ -2,9 +2,26 @@
 
 import { useState } from 'react';
 
-export default function ProfileEditModal({ user, onClose, onSave }) {
+interface ProfileEditModalProps {
+  user: {
+    fullName?: string;
+    name?: string;
+    status?: string;
+    about?: string;
+    avatar: string;
+  };
+  onClose: () => void;
+  onSave: (formData: {
+    name: string;
+    status: string;
+    about: string;
+    avatar: string;
+  }) => void;
+}
+
+export default function ProfileEditModal({ user, onClose, onSave }: ProfileEditModalProps) {
   const [formData, setFormData] = useState({
-    name: user.fullName || user.name,
+    name: user.fullName || user.name || '',
     status: user.status || 'Available',
     about: user.about || 'Love connecting with people and sharing great moments.',
     avatar: user.avatar
@@ -26,7 +43,7 @@ export default function ProfileEditModal({ user, onClose, onSave }) {
     `https://readdy.ai/api/search-image?query=Clean%20professional%20portrait%20photo%2C%20minimalist%20background%2C%20person%20in%20modern%20business%20attire%2C%20confident%20approachable%20expression%2C%20studio%20quality&width=120&height=120&seq=avatar6&orientation=squarish`
   ];
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value

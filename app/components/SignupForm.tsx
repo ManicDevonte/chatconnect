@@ -1,9 +1,13 @@
-
 'use client';
 
 import { useState } from 'react';
 
-export default function SignupForm({ onLogin, onSwitchToSignin }) {
+type SignupFormProps = {
+  onLogin: (...args: any[]) => void;
+  onSwitchToSignin: () => void;
+};
+
+export default function SignupForm({ onLogin, onSwitchToSignin }: SignupFormProps) {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -14,7 +18,7 @@ export default function SignupForm({ onLogin, onSwitchToSignin }) {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
@@ -30,7 +34,7 @@ export default function SignupForm({ onLogin, onSwitchToSignin }) {
     }, 1000);
   };
 
-  const handleOTPVerification = (e) => {
+  const handleOTPVerification = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (otp === '123456') {
       const userData = {

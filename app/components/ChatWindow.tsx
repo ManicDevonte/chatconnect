@@ -1,6 +1,15 @@
 import React, { useState } from "react";
 
-export default function ChatWindow({ messages = [] }) {
+type Message = {
+  text: string;
+  isUser: boolean;
+};
+
+interface ChatWindowProps {
+  messages?: Message[];
+}
+
+export default function ChatWindow({ messages = [] }: ChatWindowProps) {
   const [input, setInput] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
